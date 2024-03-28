@@ -58,7 +58,7 @@ def compute_human_correlation(base_fold, ann_file, args, tauvariant='c'):
     file_time = time.strftime('%y%m%d%H%M%S', time.localtime(time.time()))
     result_folder = f'./results/'
     os.makedirs(result_folder, exist_ok=True)
-    result_file = os.path.join(result_folder, f"fleur_{ann_file[:-5]}_{file_time}.txt")
+    result_file = os.path.join(result_folder, f"reffleur_{ann_file[:-5]}_{file_time}.txt")
     result_file = open(result_file, 'w')
     
     our_scores = []
@@ -75,7 +75,7 @@ def compute_human_correlation(base_fold, ann_file, args, tauvariant='c'):
             inputs = [qs]
             outputs = None
 
-            image = Image.open(os.path.join('/data/ylee1846/FlickrImages', image_file)).convert('RGB')
+            image = Image.open(os.path.join('PLEASE_CHANGE_IMAGE_FILE_DIR', image_file)).convert('RGB')
             image_tensor = process_images([image], image_processor, args)
             if type(image_tensor) is list:
                 image_tensor = [image.to(model.device, dtype=torch.float16) for image in image_tensor]
