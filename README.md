@@ -7,10 +7,14 @@ FLEUR utilizes the LLaVA model for performing image caption evaluation (though y
 
 
 ## Evaluation on Flickr8k-Expert dataset
+* Running code for FLEUR:
 ```
 CUDA_VISIBLE_DEVICES=0,1 python fleur.py
 ```
-
+* Running code for RefFLEUR:
+```
+CUDA_VISIBLE_DEVICES=0,1 python reffleur.py
+```
 ## Or get the explanation together
 ```
 CUDA_VISIBLE_DEVICES=0,1 python fleur_exp.py
