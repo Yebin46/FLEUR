@@ -170,7 +170,6 @@ def compute_human_correlation(ann_file, args, tauvariant='c'):
                 print("Error!")
 
             our_scores.extend([score.cpu()]*3)
-        # our_scores.append(score.cpu())
         else:
             continue
 
