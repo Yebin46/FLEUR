@@ -42,7 +42,6 @@ def compute_accuracy(args):
 
     conv_mode = "llava_v1"
     
-    
     accuracy = {}
     for cat, cat_data in data.items():
         file_time = time.strftime('%y%m%d%H%M%S', time.localtime(time.time()))

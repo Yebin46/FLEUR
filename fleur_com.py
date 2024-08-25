@@ -25,11 +25,10 @@ def compute_human_correlation(args, tauvariant='c'):
     with open(args.base_fold + '/' + args.input_json) as f:
         total_data = json.load(f)
 
-    # 'PLEASE_CHANGE_IMAGE_FILE_DIR'
     image_folders = {
-        "flickr8k" : "flickr8k", # directory containing flickr8k image folder
-        "flickr30k" : "flickr30k", # directory containing flickr30k image folder
-        "coco" : "coco2014" # directory containing coco2014 image folder
+        "flickr8k" : 'PLEASE_CHANGE_IMAGE_FILE_DIR', # directory containing flickr8k image folder
+        "flickr30k" : 'PLEASE_CHANGE_IMAGE_FILE_DIR', # directory containing flickr30k image folder
+        "coco" : 'PLEASE_CHANGE_IMAGE_FILE_DIR' # directory containing coco2014 image folder
         }
 
     temperature = 0.2
