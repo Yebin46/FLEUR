@@ -21,21 +21,15 @@ from llava.model.builder import load_pretrained_model
 from llava.mm_utils import process_images, tokenizer_image_token, get_model_name_from_path, KeywordsStoppingCriteria
 
 
-def compute_human_correlation(ann_file, args, tauvariant='c'):
-    with open(args.base_fold + '/' + ann_file) as f:
-        data = json.load(f)
+def compute_human_correlation(args, tauvariant='c'):
+    with open(args.base_fold + '/' + args.input_json) as f:
+        total_data = json.load(f)
 
-    img_list = []
-    txt_list = []
-    human_scores = []
-    for k, v in list(data.items()):
-        for human_judgement in v['human_judgement']:
-            if np.isnan(human_judgement['rating']):
-                print('NaN')
-                continue
-            human_scores.append(human_judgement['rating'])
-            img_list.append(human_judgement['image_path'])
-            txt_list.append(' '.join(human_judgement['caption'].split()))
+    image_folders = {
+        "flickr8k" : 'PLEASE_CHANGE_IMAGE_FILE_DIR', # directory containing flickr8k image folder
+        "flickr30k" : 'PLEASE_CHANGE_IMAGE_FILE_DIR', # directory containing flickr30k image folder
+        "coco" : 'PLEASE_CHANGE_IMAGE_FILE_DIR' # directory containing coco2014 image folder
+        }
 
     temperature = 0.2
     num_beams = 1
@@ -57,12 +51,19 @@ def compute_human_correlation(ann_file, args, tauvariant='c'):
     file_time = time.strftime('%y%m%d%H%M%S', time.localtime(time.time()))
     result_folder = f'./results/'
     os.makedirs(result_folder, exist_ok=True)
-    result_file = os.path.join(result_folder, f"fleur_{ann_file[:-5]}_{file_time}.txt")
+    result_file = os.path.join(result_folder, f"fleur_{args.input_json[:-5]}_{file_time}.txt")
     result_file = open(result_file, 'w')
     
     our_scores = []
-    for idx, (image_file, candidate) in enumerate(zip(tqdm(img_list), txt_list)):
-        if idx % 3 == 0:
+    human_scores = []
+
+    for data_name, data in total_data.items():
+        result_file.write(f'{data_name} dataset\n\n')
+        for sample in tqdm(data, desc=data_name):
+            image_file = sample["image"]
+            candidate = sample["caption"]
+            human_scores.append(sample["human"])
+
             result_file.write(f'image file : {image_file}\n')
             result_file.write(f'caption : {candidate}\n')
 
@@ -73,7 +74,7 @@ def compute_human_correlation(ann_file, args, tauvariant='c'):
             inp = f'Your task is to evaluate and rate the caption on a scale of 0.0 to 1.0 based on the given Grading Criteria. (Print Real Number Score ONLY)\n\nGrading Criteria:\n\n0.0: The caption does not describe the image at all.\n1.0: The caption accurately and clearly describes the image.\n\nCaption: {candidate}\n\nScore(Choose a rating from 0.0 to 1.0):'
             outputs = None
 
-            image = Image.open(os.path.join('PLEASE_CHANGE_IMAGE_FILE_DIR', image_file)).convert('RGB')
+            image = Image.open(os.path.join(image_folders[data_name], image_file)).convert('RGB')
             image_tensor = process_images([image], image_processor, args)
             if type(image_tensor) is list:
                 image_tensor = [image.to(model.device, dtype=torch.float16) for image in image_tensor]
@@ -169,23 +170,20 @@ def compute_human_correlation(ann_file, args, tauvariant='c'):
             except:
                 print("Error!")
 
-            our_scores.extend([score.cpu()]*3)
-        else:
-            continue
+            our_scores.append(score.cpu())
 
     result_file.close()
+
+    assert len(our_scores) == len(human_scores)
+
     print(f'Score Tau-{tauvariant}: {100*scipy.stats.kendalltau(our_scores, human_scores, variant=tauvariant)[0]:.3f}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base_fold", default='flickr8k', help="annotation file folder")
-    parser.add_argument("--input_json_c", default='flickr8k.json')
-    parser.add_argument("--input_json_b", default='crowdflower_flickr8k.json')
+    parser.add_argument("--base_fold", default='composite', help="annotation file folder")
+    parser.add_argument("--input_json", default='composite.json')
     parser.add_argument("--image-aspect-ratio", type=str, default='pad')
     args = parser.parse_args()
 
-    print('Flickr8K Expert (Tau-c)')
-    compute_human_correlation(args.input_json_c, args, tauvariant='c')
-
-    # print('Flickr8K CrowdFlower (Tau-b)')
-    # compute_human_correlation(args.input_json_b, args, tauvariant='b')
+    print('COMPOSITE (Tau-c)')
+    compute_human_correlation(args, tauvariant='c')
