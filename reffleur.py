@@ -15,6 +15,7 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import TextStreamer
 
+import LLaVA.llava as llava
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
