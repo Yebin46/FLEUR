@@ -1,6 +1,5 @@
 import argparse
 import torch
-
 import LLaVA.llava as llava
 from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
@@ -24,7 +23,7 @@ def main(args):
     # Model
     disable_torch_init()
 
-    base_fold = './flickr8k'
+    base_fold = '/home/parkis/temp/FLEUR/annotations' #'./flickr8k'
     ann_file = 'flickr8k.json'
 
     data = {}
@@ -44,7 +43,7 @@ def main(args):
             txt_list.append(' '.join(human_judgement['caption'].split()))
             
     model_name = get_model_name_from_path(args.model_path)
-    tokenizer, model, image_processor, context_len = load_pretrained_model(args.model_path, args.model_base, model_name, args.load_8bit, args.load_4bit, device=args.device)
+    tokenizer, model, image_processor, context_len = load_pretrained_model(args.model_path, args.model_base, model_name, device=args.device)
     rate2token = {s : tokenizer.encode(str(s))[-1] for s in range(10)}
 
     if 'llama-2' in model_name.lower():
@@ -82,7 +81,7 @@ def main(args):
             conv = conv_templates[conv_mode].copy()
             roles = conv.roles
             
-            image = Image.open(os.path.join('PLEASE_CHANGE_IMAGE_FILE_DIR', image_file)).convert('RGB')
+            image = Image.open(os.path.join('/data/parkis/data/flickr8k', image_file)).convert('RGB')
             image_tensor = process_images([image], image_processor, args)
             if type(image_tensor) is list:
                 image_tensor = [image.to(model.device, dtype=torch.float16) for image in image_tensor]
